@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#13232e"><title>Hora Românilor LIVE — 3D cu muzică</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,Arial,sans-serif;background:#101e29;color:white;touch-action:manipulation}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+#shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(2,13,26,.72),transparent 27%,transparent 60%,rgba(5,14,19,.78))}
+header{position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;padding:16px 16px 5px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+h1{font-size:21px;margin:0;letter-spacing:.02em;text-shadow:0 2px 6px #000}header p{font-size:12px;margin:4px 0;color:#e2eacb}.live{background:#ed335c;font-size:11px;font-weight:800;padding:6px 9px;border-radius:999px;white-space:nowrap}
+#scores{position:absolute;top:94px;left:12px;width:min(45vw,205px);background:#091823b2;border:1px solid #ffffff33;backdrop-filter:blur(8px);border-radius:14px;padding:10px;font-size:11px}
+#scores strong{display:block;margin-bottom:7px;font-size:13px;color:#ffdd87}#scoreRows div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #ffffff16}
+.badge{position:absolute;right:10px;top:98px;background:#1d2a38bb;border:2px solid #e84c49;border-radius:50%;width:79px;height:79px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;text-shadow:1px 2px #000;font-size:16px}.badge small{font-size:10px;color:#ffe1b4}
+#hint{position:absolute;top:188px;right:10px;background:#142633ab;font-size:10px;padding:7px 9px;border-radius:10px;max-width:142px;text-align:center}
+#notice{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:800;text-align:center;background:#1b293fd9;padding:10px 16px;border-radius:12px;opacity:0;transition:opacity .3s;max-width:86%;pointer-events:none}
+#giftFx{position:absolute;left:50%;bottom:155px;transform:translateX(-50%) scale(.9);min-width:210px;max-width:88vw;background:linear-gradient(180deg,rgba(255,91,130,.96),rgba(207,40,86,.95));border-radius:18px;padding:10px 14px;box-shadow:0 12px 28px rgba(0,0,0,.35);display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border:1px solid rgba(255,255,255,.24)}
+#giftFx.show{opacity:1;transform:translateX(-50%) scale(1)}
+#giftFx .icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.18);font-size:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+#giftFx .meta{display:flex;flex-direction:column;line-height:1.1}#giftFx .meta b{font-size:15px}#giftFx .meta small{font-size:11px;opacity:.9}
+#giftFx .count{margin-left:auto;font-weight:900;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+#joinHint{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);padding:10px 16px;background:#101010d9;border:1px solid rgba(255,255,255,.16);border-radius:999px;font-size:13px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+footer{position:absolute;left:0;right:0;bottom:0;padding:16px 12px calc(17px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,#0b1c25e6 20%);display:flex;flex-direction:column;gap:8px}
+#status{text-align:center;font-size:12px;color:#fff1c0}#actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}#actions button{padding:10px 4px;font-size:11px}#actions button:nth-child(4){background:#b23d93}#actions button:nth-child(5){background:#6e5ccd}
+button{background:#e63655;color:white;border:1px solid #ffffff44;border-radius:12px;padding:12px 5px;font-weight:750;font-size:12px;box-shadow:0 3px 12px #0005;cursor:pointer}button:nth-child(2){background:#206b8b}button:nth-child(3){background:#9851bc}button:active{transform:scale(.97)}.sub{display:flex;justify-content:center;gap:15px;font-size:11px;color:#b9c9cc}
+#nameBox{display:none;position:absolute;inset:0;background:#0008;align-items:center;justify-content:center}#nameCard{width:85%;max-width:360px;padding:20px;border-radius:16px;background:#183448;border:1px solid #9ab4c1}#nameCard h3{margin:0 0 12px}#nameCard input{width:100%;padding:12px;font-size:16px;border-radius:9px;border:0;margin-bottom:10px}#nameCard .buttons{display:flex;gap:8px}#nameCard button{flex:1}
+
+#musicBar{display:flex;align-items:center;gap:7px;background:#10232ddc;border:1px solid #ffffff40;
+ border-radius:12px;padding:8px 10px;margin-bottom:2px}
+#musicBar button{background:#285f6e;min-width:46px;padding:9px;border-radius:8px}
+#musicBar label{background:#2b5363;padding:10px 8px;border-radius:8px;font-size:12px;font-weight:750;cursor:pointer;white-space:nowrap}
+#musicBar input[type=file]{display:none}
+#musicName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;font-size:11px;color:#e1f8ff}
+#musicBar input[type=range]{width:54px;accent-color:#ed4566}
+
+#connectPanel{display:flex;gap:6px;align-items:center;background:#10262fe3;border:1px solid #6d9dad;border-radius:10px;padding:6px 8px;font-size:11px}
+#bridgeUrl{width:100%;min-width:60px;background:#f4fbfc;color:#15242a;border:0;border-radius:6px;padding:8px;font-size:12px}
+#bridgeConnect{padding:8px;white-space:nowrap;background:#367c70}
+#bridgeState{max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style></head><body>
+<canvas id="scene"></canvas><div id="shade"></div>
+<header><div><h1>🇷🇴 HORA ROMÂNILOR</h1><p>Intră în horă • Dansează împreună • LIVE</p></div><span class="live">● DEMO 3D+</span></header>
+<div id="scores"><strong>🏆 Top participanți</strong><div id="scoreRows"></div></div>
+<div class="badge"><small>ÎN HORĂ</small><span id="counter">0</span><small>dansatori</small></div>
+<div id="hint">💬 Scrie „HORA”<br>🌹 Trimite o floare<br><small>(simulare)</small></div>
+<div id="notice"></div>
+<div id="giftFx"><div class="icon" id="giftIcon">🌹</div><div class="meta"><small id="giftSender">Mihai a trimis</small><b id="giftTarget">pentru Ana</b></div><div class="count" id="giftCount">x12</div></div>
+<div id="joinHint">💬 Comment to join the hora!</div>
+<footer><div id="connectPanel"><input id="bridgeUrl" placeholder="https://serviciul-tau.onrender.com"><button id="bridgeConnect">Conectează</button><span id="bridgeState">Offline</span></div><div id="musicBar">
+<button type="button" id="musicPlay" aria-label="Pornește sau oprește muzica">▶</button>
+<label for="musicFile">🎵 Alege MP3</label>
+<input type="file" id="musicFile" accept="audio/*,.mp3,.m4a,.wav,.ogg">
+<span id="musicName">Fără muzică</span>
+<input id="musicVolume" type="range" aria-label="Volum muzică" min="0" max="100" value="65">
+<audio id="musicAudio" loop preload="none"></audio>
+</div><div id="status">🎻 Pași „5 bani, 10 bani” • Mână în mână</div><div id="actions"><button id="join">💃 Intră în horă</button><button id="rose">🌹 Rose</button><button id="heart">💝 Inimă</button><button id="gift">🎁 Cadou</button><button id="diamond">💎 Diamant</button><button id="party">🎆 Sărbătoare</button></div><div class="sub"><span>Demo local, fără conexiune TikTok</span><span id="fps"></span></div></footer>
+<div id="nameBox"><div id="nameCard"><h3>💃 Cine intră în horă?</h3><input id="username" maxlength="16" placeholder="Nume TikTok" autocomplete="off"><div class="buttons"><button id="cancel">Renunță</button><button id="confirm">Intră!</button></div></div></div>
+<script>
+(()=>{'use strict';
+const C=document.getElementById('scene'),g=C.getContext('2d',{alpha:false});
+let W=0,H=0,dpr=1,clock=0,last=performance.now(),frames=0,fpsAt=last;
+let dancers=[],particles=[],state={roses:0,events:0};
+const names=['Mihai','Andreea','Sorin','Maria','Alex','Ioana','Răzvan','Denisa','Cristi','Elena','Vlad','Ana','Darius','Nico','Adrian','Mihaela','Bogdan','Alina','Florin','Diana','Ionuț','Gabriela','George'];
+const viewers=['Mihai','Ștefania 🤍','MAX','Lau3107','Simo997','Răzvan','Alexandra','Reby','Violinist','Accordionist','Daniel','Dragos'];
+const rand=(a,b)=>Math.random()*(b-a)+a,choose=a=>a[Math.floor(Math.random()*a.length)];
+const baseCam={cx:0,cy:10.3,cz:20.2,tilt:.55};
+const cam={cx:baseCam.cx,cy:baseCam.cy,cz:baseCam.cz,tilt:baseCam.tilt};
+let focus=null,romance=null;
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;C.width=W*dpr;C.height=H*dpr;C.style.width=W+'px';C.style.height=H+'px';g.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resize);resize();
+function proj(p){let dx=p[0]-cam.cx,dy=p[1]-cam.cy,dz=p[2]-cam.cz;let co=Math.cos(cam.tilt),si=Math.sin(cam.tilt),y=dy*co-dz*si,z=dy*si+dz*co;let depth=-z;let scale=Math.min(W*1.23,H*.74);let f=scale/(depth+16);return [W*.5+dx*f,H*.48-y*f,f,depth]}
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+function lerp(a,b,t){return a+(b-a)*t}
+function updateCamera(dt){
+ let target={...baseCam};
+ if(focus){
+   focus.t+=dt;
+   if(focus.idx<dancers.length){
+     const pose=focus.kind==='couple'?{x:0,z:.9}:getPose(focus.idx,dancers.length);
+     const tt=Math.min(1,focus.t/Math.max(focus.inDur,.001));
+     const hold=focus.t>focus.inDur&&focus.t<focus.inDur+focus.hold;
+     const outStart=focus.inDur+focus.hold;
+     let blend=hold?1:(focus.t<=focus.inDur?ease(tt):(focus.t>=outStart?1-ease(Math.min(1,(focus.t-outStart)/Math.max(focus.outDur,.001))):1));
+     target={
+       cx: lerp(baseCam.cx, focus.kind==='couple'?0:pose.x*.62, blend),
+       cy: lerp(baseCam.cy, focus.kind==='couple'?5.1:5.0, blend),
+       cz: lerp(baseCam.cz, focus.kind==='couple'?10.0:8.6+pose.z*.28, blend),
+       tilt: lerp(baseCam.tilt,.4,blend)
+     };
+     if(focus.t>focus.inDur+focus.hold+focus.outDur) focus=null;
+   }else focus=null;
+ }
+ cam.cx += (target.cx-cam.cx)*Math.min(1,dt*4.2);
+ cam.cy += (target.cy-cam.cy)*Math.min(1,dt*4.2);
+ cam.cz += (target.cz-cam.cz)*Math.min(1,dt*4.2);
+ cam.tilt += (target.tilt-cam.tilt)*Math.min(1,dt*4.2);
+}
+function poly(v,fill,stroke,sw=1){g.beginPath();v.forEach((p,i)=>{let a=proj(p);if(!i)g.moveTo(a[0],a[1]);else g.lineTo(a[0],a[1])});g.closePath();g.fillStyle=fill;g.fill();if(stroke){g.strokeStyle=stroke;g.lineWidth=sw;g.stroke()}}
+function line(v,color,width){g.beginPath();v.forEach((p,i)=>{let a=proj(p);if(!i)g.moveTo(a[0],a[1]);else g.lineTo(a[0],a[1])});g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';g.stroke()}
+function cube(x,y,z,w,h,d,front,right,top){let x0=x-w/2,x1=x+w/2,z0=z-d/2,z1=z+d/2;poly([[x0,y,z1],[x1,y,z1],[x1,y+h,z1],[x0,y+h,z1]],front);poly([[x1,y,z1],[x1,y,z0],[x1,y+h,z0],[x1,y+h,z1]],right||front);poly([[x0,y+h,z1],[x1,y+h,z1],[x1,y+h,z0],[x0,y+h,z0]],top||front)}
+function shade(hex,n){let v=parseInt(hex.slice(1),16),r=v>>16,gg=(v>>8)&255,b=v&255;return `rgb(${Math.max(0,Math.min(255,r*(1+n)))|0},${Math.max(0,Math.min(255,gg*(1+n)))|0},${Math.max(0,Math.min(255,b*(1+n)))|0})`}
+function cyl(x,y,z,r,h,col,n=8){let a=[],b=[];for(let i=0;i<n;i++){let ang=i*2*Math.PI/n;a.push([x+Math.cos(ang)*r,y,z+Math.sin(ang)*r]);b.push([x+Math.cos(ang)*r,y+h,z+Math.sin(ang)*r])}for(let i=0;i<n;i++){let j=(i+1)%n;poly([a[i],a[j],b[j],b[i]],i%2===0?col:shade(col,-.1))}poly(b,col)}
+function tree(x,z,s=1){cyl(x,0,z,.16*s,1.45*s,'#62482d',7);for(let k=0;k<3;k++){let y=(1.03+k*.54)*s,rr=(1.12-k*.23)*s;let pts=[];for(let i=0;i<9;i++){let a=i*Math.PI*2/9;pts.push([x+Math.cos(a)*rr,y,z+Math.sin(a)*rr])}for(let i=0;i<9;i++)poly([pts[i],pts[(i+1)%9],[x,y+1.6*s,z]],k%2?'#2c643d':'#315b36')}}
+function house(x,z,s=1){cube(x,0,z,2.9*s,1.95*s,2.5*s,'#dbc49b','#b49c78','#f0d6a9');poly([[x-1.7*s,1.96*s,z+1.32*s],[x+1.7*s,1.96*s,z+1.32*s],[x,3.15*s,z+1.32*s]],'#783b32');poly([[x,3.15*s,z+1.32*s],[x,3.15*s,z-1.52*s],[x+1.7*s,1.96*s,z-1.52*s],[x+1.7*s,1.96*s,z+1.32*s]],'#542d31');cube(x-.7*s,0,z+1.29*s,.52*s,1.04*s,.06*s,'#47352b');cube(x+.66*s,.85*s,z+1.28*s,.67*s,.63*s,.07*s,'#73aec2');line([[x+.66*s,.86*s,z+1.35*s],[x+.66*s,1.45*s,z+1.35*s]],'#e4dcc6',2)}
+function grass(){g.fillStyle='#7ca457';g.fillRect(0,0,W,H);for(let k=16;k>=-15;k--){let z=k*.85;poly([[-25,0,z],[25,0,z],[25,0,z+.85],[-25,0,z+.85]],k%2===0?'#779d52':'#73994e')}for(let i=0;i<140;i++){let q=i*23.91,x=Math.sin(q)*16,z=Math.cos(q*.31)*17;if(Math.abs(x)<6&&Math.abs(z)<5)continue;let p=proj([x,.02,z]);g.strokeStyle=i%4===0?'#9eb766':'#4a7739';g.lineWidth=Math.max(.5,p[2]*.12);g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(p[0]-2,p[1]-4);g.stroke()}}
+function circleGround(){const N=48;let v=[];for(let i=0;i<N;i++){let a=i*2*Math.PI/N;v.push([Math.cos(a)*7.1,.035,Math.sin(a)*5.25])}poly(v,'#bd9d74','#e0c6a1',2);for(let r of [6.5,5.85]){let vv=[];for(let i=0;i<=N;i++){let a=i*2*Math.PI/N;vv.push([Math.cos(a)*r,.041,Math.sin(a)*r*.74])}line(vv,'#e4c48b',2)}}
+function bench(x,z){cube(x,.15,z,2,.2,.5,'#9c5336','#6c422d','#b97648');for(let dx of [-.7,.7])cube(x+dx,0,z,.15,.26,.15,'#533927')}
+function ball(x,y,z,r,col){let pp=proj([x,y,z]),rr=Math.max(1,pp[2]*r);let gr=g.createRadialGradient(pp[0]-rr*.32,pp[1]-rr*.36,rr*.08,pp[0],pp[1],rr);gr.addColorStop(0,shade(col,.24));gr.addColorStop(.7,col);gr.addColorStop(1,shade(col,-.38));g.fillStyle=gr;g.beginPath();g.ellipse(pp[0],pp[1],rr,rr*.98,0,0,7);g.fill()}
+function limb(A,B,color,width){let x=proj(A),y=proj(B);g.beginPath();g.moveTo(x[0],x[1]);g.lineTo(y[0],y[1]);g.lineCap='round';g.strokeStyle=shade(color,-.25);g.lineWidth=width+2;g.stroke();g.strokeStyle=color;g.lineWidth=width;g.stroke()}
+function getPose(idx,total){
+ let angle=idx/Math.max(total,1)*Math.PI*2+clock*.12;
+ let r=Math.min(6.4,3.7+total*.12);
+ const ordinary={x:Math.cos(angle)*r,z:Math.sin(angle)*r*.74};
+ if(romance&&(idx===romance.a||idx===romance.b)){
+   const k=idx===romance.a?-1:1;
+   const phase=romance.t;
+   const arriving=ease(Math.min(1,phase/1.45));
+   const leaving=phase>5.35?1-ease(Math.min(1,(phase-5.35)/1.45)):1;
+   const blend=arriving*leaving;
+   const step=Math.sin(clock*6+k)*.09;
+   return {x:lerp(ordinary.x,k*.28+step,blend),z:lerp(ordinary.z,.85+Math.sin(clock*6)*.06,blend)};
+ }
+ return ordinary;
+}
+function person(d,idx,total){
+ let {x,z}=getPose(idx,total);
+ let pair=romance&&(idx===romance.a||idx===romance.b)&&romance.t>1.25&&romance.t<5.65;
+ let kiss=pair&&romance.t>3.25&&romance.t<4.5;
+ let headX=x+(kiss?(idx===romance.a?.135:-.135):0);
+ let sc=.95,y=.12+Math.abs(Math.sin(clock*3.55+idx*.23))*.095;
+ let female=d.female;
+ // Five/ten bani inspired folk step: three lateral travelling steps, tap, then reverse.
+ const beat=clock*3.55, phase=((beat%(Math.PI*4))/(Math.PI*4)), direction=phase<.5?1:-1;
+ const step=Math.sin(beat+idx*.23), arm=Math.sin(beat*.5);
+ const footLift=Math.max(0,Math.sin(beat*2+idx*.2));
+ const travel=.11*Math.sin(beat*.5), inCouple=romance&&(idx===romance.a||idx===romance.b)&&romance.t>1.25&&romance.t<5.65;
+ let skin=['#e6b08c','#c99576','#f0b994','#d5a07b'][idx%4];
+ let hair=['#32251e','#573829','#241e20','#76513a'][idx%4];
+ let skirt=['#a92f3c','#254f7c','#9a3c31','#4f3f79','#17716e'][idx%5];
+ let blouse=female?'#fff1df':'#f6ecd9'; let pants=['#262c34','#373039','#302b28'][idx%3];
+ for(let side of [-1,1]){
+   let active=(side===direction);
+   let lift=active?footLift*.19*sc:Math.max(0,Math.sin(beat*2+Math.PI+idx*.2))*.08*sc;
+   let xx=x+side*.19*sc,zz=z+(side===1?step:-step)*.22*sc;
+   let out=side*travel;
+   let knee=[xx+out*.5,y+.38*sc+lift*.4,z+(side===1?step:-step)*.11*sc];
+   let toe=[xx+side*.065*sc+out,y+.095*sc+lift,zz];
+   limb([xx,y+.63*sc,z],knee,female?'#dfb08a':pants,Math.max(2,proj([x,0,z])[2]*.18));
+   limb(knee,toe,female?'#dfb08a':pants,Math.max(2,proj([x,0,z])[2]*.16));
+   ball(toe[0],toe[1],toe[2]+.055,.16*sc,'#302523');
+ }
+ if(female){const layers=12;for(let k=0;k<layers;k++){let A=k*Math.PI*2/layers,B=(k+1)*Math.PI*2/layers;let wave=Math.sin(A*5+clock*3.5)*.045;poly([[x+Math.cos(A)*.22*sc,y+1.13*sc,z+Math.sin(A)*.21*sc],[x+Math.cos(B)*.22*sc,y+1.13*sc,z+Math.sin(B)*.21*sc],[x+Math.cos(B)*(.53+wave)*sc,y+.49*sc,z+Math.sin(B)*(.48+wave)*sc],[x+Math.cos(A)*(.53+wave)*sc,y+.49*sc,z+Math.sin(A)*(.48+wave)*sc]],k%3===0?shade(skirt,.18):k%2===0?skirt:shade(skirt,-.15))}poly([[x-.23*sc,y+1.0*sc,z+.30*sc],[x+.23*sc,y+1.0*sc,z+.30*sc],[x+.34*sc,y+.51*sc,z+.46*sc],[x-.34*sc,y+.51*sc,z+.46*sc]],'#f2e4cb');for(let k=0;k<4;k++)line([[x-.21*sc,y+(.62+k*.075)*sc,z+.48*sc],[x+.21*sc,y+(.62+k*.075)*sc,z+.48*sc]],k%2?'#ba2c39':'#223e65',1.1);cube(x,y+1.08*sc,z,.55*sc,.65*sc,.37*sc,blouse,shade(blouse,-.16));poly([[x-.285*sc,y+1.52*sc,z+.24*sc],[x-.07*sc,y+1.53*sc,z+.265*sc],[x-.17*sc,y+1.08*sc,z+.28*sc],[x-.31*sc,y+1.05*sc,z+.22*sc]],'#3c2c2c');poly([[x+.285*sc,y+1.52*sc,z+.24*sc],[x+.07*sc,y+1.53*sc,z+.265*sc],[x+.17*sc,y+1.08*sc,z+.28*sc],[x+.31*sc,y+1.05*sc,z+.22*sc]],'#3c2c2c');line([[x,y+1.06*sc,z+.29*sc],[x,y+1.51*sc,z+.29*sc]],'#b33232',2);for(let k=0;k<3;k++)ball(x+(-.15+k*.15)*sc,y+1.34*sc,z+.31*sc,.028*sc,'#e1a44d');line([[x-.32*sc,y+1.07*sc,z+.30*sc],[x+.32*sc,y+1.07*sc,z+.30*sc]],'#e8bf64',3)}
+ else{cube(x,y+.51*sc,z,.69*sc,.32*sc,.44*sc,'#f2efe5');cube(x,y+1.12*sc,z,.67*sc,.8*sc,.42*sc,blouse,shade(blouse,-.12));poly([[x-.34*sc,y+1.51*sc,z+.28*sc],[x-.05*sc,y+1.52*sc,z+.28*sc],[x-.15*sc,y+.89*sc,z+.29*sc],[x-.35*sc,y+.89*sc,z+.25*sc]],'#25262c');poly([[x+.34*sc,y+1.51*sc,z+.28*sc],[x+.05*sc,y+1.52*sc,z+.28*sc],[x+.15*sc,y+.89*sc,z+.29*sc],[x+.35*sc,y+.89*sc,z+.25*sc]],'#25262c');for(let k=0;k<5;k++){let yy=(1.02+k*.11)*sc;ball(x-.26*sc,y+yy,z+.31*sc,.025*sc,'#e7b448');ball(x+.26*sc,y+yy,z+.31*sc,.025*sc,'#e7b448')}line([[x-.36*sc,y+.93*sc,z+.33*sc],[x+.36*sc,y+.93*sc,z+.33*sc]],'#a9362d',4)}
+ let armWidth=Math.max(3,proj([x,0,z])[2]*.27);
+ // Each arm reaches for the neighbouring dancer. Shared target is computed from
+ // the same pair of poses on both sides so their hands visibly meet.
+ for(let side of [-1,1]){
+   let next=(idx+side+total)%total, other=getPose(next,total);
+   const neighbourDetached=romance&&(next===romance.a||next===romance.b)&&romance.t>1.25&&romance.t<5.65;
+   let connected=total>2&&!inCouple&&!neighbourDetached;
+   let dx=other.x-x,dz=other.z-z,dist=Math.hypot(dx,dz)||1;
+   let reachX=connected?(x+other.x)/2:x+side*.83*sc;
+   let reachZ=connected?(z+other.z)/2:z+.05;
+   let wave=Math.sin(beat+idx*.22)*.085;
+   let handY=y+(1.40+wave)*sc;
+   let sx=x+dx/dist*.29*sc,sz=z+dz/dist*.29*sc;
+   let ex=(sx+reachX)/2,ez=(sz+reachZ)/2;
+   limb([sx,y+1.52*sc,sz],[ex,y+1.4*sc,ez],blouse,armWidth);
+   limb([ex,y+1.4*sc,ez],[reachX,handY,reachZ],skin,armWidth*.62);
+   ball(reachX,handY,reachZ,.065*sc,skin);
+ }
+ cyl(x,y+1.63*sc,z,.11*sc,.14*sc,skin,8);ball(headX,y+1.88*sc,z,.245*sc,skin);let fp=proj([headX,y+1.88*sc,z+.224*sc]),radius=proj([x,0,z])[2]*.245*sc;if(radius>3.2){g.fillStyle='#312925';for(let side of [-1,1]){g.beginPath();g.arc(fp[0]+side*radius*.37,fp[1]-radius*.05,Math.max(.75,radius*.08),0,7);g.fill()}g.strokeStyle=shade(skin,-.32);g.lineWidth=Math.max(.65,radius*.08);g.beginPath();g.moveTo(fp[0],fp[1]+radius*.02);g.lineTo(fp[0]-radius*.02,fp[1]+radius*.3);g.stroke();g.beginPath();g.arc(fp[0],fp[1]+radius*.27,radius*.24,.12,Math.PI-.12);g.stroke()}
+ if(female){ball(headX,y+2.075*sc,z-.045*sc,.235*sc,hair);ball(headX-.16*sc,y+1.85*sc,z-.12*sc,.14*sc,hair);ball(headX+.16*sc,y+1.85*sc,z-.12*sc,.14*sc,hair);line([[headX-.23*sc,y+2.055*sc,z+.11*sc],[headX+.22*sc,y+2.07*sc,z+.11*sc]],'#c94b40',2)}else{ball(headX,y+2.065*sc,z-.05*sc,.24*sc,hair);cyl(headX,y+2.1*sc,z,.29*sc,.22*sc,'#252326',8)}
+ let p=proj([x,y+2.54*sc,z]),sz=Math.max(9,Math.min(14,p[2]*.74));g.textAlign='center';g.font=`700 ${sz}px system-ui`;g.shadowColor='#001';g.shadowBlur=5;g.lineWidth=3;g.strokeStyle='#15222b';g.strokeText(d.name,p[0],p[1]);g.fillStyle='#fff';g.fillText(d.name,p[0],p[1]);g.shadowBlur=0;
+ if(d.highlight>0){const ringY=.09+Math.sin(clock*9+idx)*.03;const R=.78+Math.sin(clock*8)*.03;let vv=[];for(let i=0;i<=26;i++){let a=i/26*Math.PI*2;vv.push([x+Math.cos(a)*R,y+ringY,z+Math.sin(a)*R*.74])}line(vv,'#ffd77a',3)}
+}
+function village(){house(-10,-9,1.5);house(10,-7,1.25);house(-10,7,1.15);house(11,8,1.3);for(let [x,z,s] of [[-8,-5,1.5],[-13,0,1.2],[7,-10,1.5],[13,-1,1.2],[-9,11,1.35],[9,11,1.15],[0,-12,1.5]])tree(x,z,s);for(let x=-13;x<=13;x+=.9){if(x>-6&&x<6)continue;cube(x,0,-13,.13,1,.13,'#6e5637')}bench(-7,1.6);bench(7,2.4)}
+function confetti(dt){particles=particles.filter(p=>p.t>0);particles.forEach(p=>{p.t-=dt;p.y+=p.vy*dt;p.x+=p.vx*dt;p.z+=p.vz*dt;let a=proj([p.x,p.y,p.z]);g.fillStyle=p.c;g.globalAlpha=Math.min(1,p.t);g.fillRect(a[0],a[1],Math.max(2,a[2]*.25),Math.max(2,a[2]*.3));g.globalAlpha=1})}
+function burst(kind,origin){for(let i=0;i<(kind==='rose'?60:180);i++){let a=Math.random()*Math.PI*2,r=rand(0,.9);let ox=origin?origin.x:Math.cos(a)*rand(0,5),oz=origin?origin.z:Math.sin(a)*rand(0,5);particles.push({x:ox+Math.cos(a)*r,y:rand(1.2,3.4),z:oz+Math.sin(a)*r,vx:rand(-2.5,2.5),vy:rand(-1.3,1.1),vz:rand(-2,2),t:rand(.8,2.2),c:kind==='rose'?['#fc3c70','#e93e48','#ff99a1'][i%3]:['#ffdc60','#f15c82','#7adad3','#f4f1df','#c49afa'][i%5]})}}
+function popup(msg){let n=document.getElementById('notice');n.textContent=msg;n.style.opacity='1';clearTimeout(popup.timer);popup.timer=setTimeout(()=>n.style.opacity='0',1600)}
+function showGift(sender,target,count,emoji='🌹'){const box=document.getElementById('giftFx');document.getElementById('giftIcon').textContent=emoji;document.getElementById('giftSender').textContent=sender+' a trimis';document.getElementById('giftTarget').textContent='pentru '+target;document.getElementById('giftCount').textContent='x'+count;box.classList.add('show');clearTimeout(showGift.timer);showGift.timer=setTimeout(()=>box.classList.remove('show'),2300)}
+function scores(){document.getElementById('counter').textContent=dancers.length;let rows=[...dancers].sort((a,b)=>b.pts-a.pts).slice(0,5);document.getElementById('scoreRows').innerHTML=rows.map((x,i)=>`<div><span>${i+1}. ${x.name.replace(/[<>&]/g,'')}</span><b>${x.pts} 🌹</b></div>`).join('')||'<div>Primul dansator poate fi TU!</div>'}
+function add(name){if(dancers.length>=48){popup('Hora este plină!');return}name=(name||choose(names)).trim().slice(0,16);if(!name)return;dancers.push({name,female:Math.random()>.5,pts:0,highlight:0});scores();popup(`💃 ${name} a intrat în horă!`)}
+function triggerRose(){if(!dancers.length)return;
+ let idx=Math.floor(Math.random()*dancers.length),p=dancers[idx],sender=choose(viewers),count=Math.random()<.35?Math.floor(rand(2,13)):1;
+ romance=null;p.pts+=count;state.roses+=count;scores();let pose=getPose(idx,dancers.length);
+ dancers.forEach(d=>d.highlight=0);p.highlight=2.8;burst('rose',pose);
+ popup(`🌹 ${p.name} a primit ${count>1?count+' Rose':'un Rose'}!`);
+ showGift(sender,p.name,count,'🌹');focus={idx,t:0,inDur:.55,hold:1.6,outDur:.9};
+}
+function startCouple(emoji,points,label){
+ if(dancers.length<2){popup('Ai nevoie de cel puțin doi dansatori');return;}
+ const a=Math.floor(Math.random()*dancers.length);
+ let candidates=dancers.map((d,i)=>i).filter(i=>i!==a&&dancers[i].female!==dancers[a].female);
+ if(!candidates.length)candidates=dancers.map((d,i)=>i).filter(i=>i!==a);
+ const b=choose(candidates),d=dancers[a],partner=dancers[b],sender=choose(viewers);
+ d.pts+=points;partner.pts+=Math.ceil(points/2);scores();
+ dancers.forEach(x=>x.highlight=0);d.highlight=7;partner.highlight=7;
+ romance={a,b,t:0};focus={kind:'couple',idx:a,t:0,inDur:1.35,hold:4.5,outDur:1.4};
+ showGift(sender,d.name,1,emoji);
+ popup(`${emoji} ${label}! ${d.name} dansează cu ${partner.name} 💞`);
+ burst('party',{x:0,z:.8});
+}
+function romanticHearts(){
+ if(!romance||romance.t<2.2||romance.t>5)return;
+ const n=romance.t;let p=proj([0,2.6+Math.sin(clock*3)*.1,1]);
+ g.save();g.textAlign='center';g.font=`${Math.round(23+Math.sin(clock*5)*4)}px system-ui`;
+ g.shadowColor='#c51660';g.shadowBlur=12;
+ for(let i=0;i<4;i++){const y=p[1]-(i*25+(clock*28)%25),x=p[0]+Math.sin(clock*2+i*2)*28;
+  g.globalAlpha=Math.max(0,1-i*.23);g.fillText(i%2?'💗':'💖',x,y)}
+ if(n>3.25&&n<4.6){g.globalAlpha=1;g.font='900 19px system-ui';g.fillText('💋 PUPIC!',p[0],p[1]-120)}
+ g.restore();
+}
+for(let n of ['Mihai','Ana','Sorin','Ioana','George','Maria','Alex','Denisa','Răzvan','Elena','Florin','Gabriela'])add(n);
+document.getElementById('notice').style.opacity=0;
+document.getElementById('join').onclick=()=>{document.getElementById('nameBox').style.display='flex';document.getElementById('username').focus()};
+document.getElementById('cancel').onclick=()=>document.getElementById('nameBox').style.display='none';
+document.getElementById('confirm').onclick=()=>{let x=document.getElementById('username').value.trim();add(x||choose(names));document.getElementById('nameBox').style.display='none';document.getElementById('username').value=''};
+document.getElementById('username').onkeydown=e=>{if(e.key==='Enter')document.getElementById('confirm').click()};
+document.getElementById('rose').onclick=triggerRose;
+document.getElementById('heart').onclick=()=>startCouple('💝',10,'Inimă');
+document.getElementById('gift').onclick=()=>startCouple('🎁',25,'Cadou');
+document.getElementById('diamond').onclick=()=>startCouple('💎',100,'Diamant');
+document.getElementById('party').onclick=()=>{burst('party');popup('🎆 HAI LA HORĂĂĂ!')};
+function render(now){let dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;if(romance){romance.t+=dt;if(romance.t>7.1)romance=null;}updateCamera(dt);g.clearRect(0,0,W,H);g.fillStyle='#83a761';g.fillRect(0,0,W,H);grass();village();circleGround();for(let d of dancers)d.highlight=Math.max(0,(d.highlight||0)-dt);for(let i=0;i<dancers.length;i++)person(dancers[i],i,dancers.length);romanticHearts();confetti(dt);frames++;if(now-fpsAt>3000){document.getElementById('fps').textContent=Math.round(frames*1000/(now-fpsAt))+' FPS';fpsAt=now;frames=0}requestAnimationFrame(render)}requestAnimationFrame(render);
+})();
+
+// Muzica este opțională. Într-un site publicat, poți include fișierul music.mp3 în același folder.
+const musicAudio=document.getElementById('musicAudio');
+const musicFile=document.getElementById('musicFile');
+const musicPlay=document.getElementById('musicPlay');
+const musicName=document.getElementById('musicName');
+const musicVolume=document.getElementById('musicVolume');
+let localMusicUrl=null;
+musicAudio.volume=.65;
+musicFile.addEventListener('change',async()=>{
+  const file=musicFile.files && musicFile.files[0];if(!file)return;
+  if(localMusicUrl)URL.revokeObjectURL(localMusicUrl);
+  localMusicUrl=URL.createObjectURL(file);
+  musicAudio.src=localMusicUrl;
+  musicName.textContent=file.name;
+  try{await musicAudio.play();musicPlay.textContent='⏸'}
+  catch(e){musicPlay.textContent='▶'}
+});
+musicPlay.addEventListener('click',async()=>{
+  if(!musicAudio.src){
+    musicAudio.src='./music.mp3';
+    musicName.textContent='music.mp3 (dacă e încărcat)';
+  }
+  if(musicAudio.paused){
+    try{await musicAudio.play();musicPlay.textContent='⏸'}
+    catch(e){musicName.textContent='Alege o melodie MP3';musicAudio.removeAttribute('src');musicAudio.load();musicPlay.textContent='▶'}
+  }else{musicAudio.pause();musicPlay.textContent='▶'}
+});
+musicVolume.addEventListener('input',()=>{musicAudio.volume=Number(musicVolume.value)/100});
+musicAudio.addEventListener('ended',()=>musicPlay.textContent='▶');
+</script></body></html>

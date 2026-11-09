@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hora-tiktok-bridge
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: TIKTOK_USERNAME
+        value: dragospreoteasa
+      - key: ALLOWED_ORIGIN
+        value: https://dovik-f3697e.netlify.app
